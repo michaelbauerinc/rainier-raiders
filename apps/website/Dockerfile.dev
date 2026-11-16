@@ -1,0 +1,12 @@
+FROM node:24-bookworm-slim
+ENV NEXT_TELEMETRY_DISABLED=1
+RUN npm install --global pnpm@12.21.0
+WORKDIR /workspace
+RUN mkdir -p /pnpm/store /workspace/apps/website/.next && chown -R node:node /workspace /pnpm
+COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
+COPY --chown=node:node apps/website/package.json ./apps/website/package.json
+USER node
+RUN pnpm install --frozen-lockfile --store-dir /pnpm/store
+COPY --chown=node:node . .
+EXPOSE 3000
+CMD ["pnpm", "--filter", "@rainier-raiders/website", "exec", "next", "dev", "--hostname", "0.0.0.0"]

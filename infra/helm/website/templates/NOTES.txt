@@ -1,0 +1,14 @@
+The website chart has rendered successfully.
+
+The default image tag is "unpublished"; publish a release image and configure
+image.repository and image.digest before deployment.
+
+{{- if .Values.ingress.enabled }}
+An Istio VirtualService is configured for {{ .Values.ingress.host }}.
+Confirm DNS, the gateway, and external HTTPS before using it.
+{{- else }}
+No public route is configured. The Service is ClusterIP.
+{{- end }}
+
+This chart does not provision PostgreSQL, credentials, or migrations.
+Both health routes are shallow until the application integrates its database.

@@ -1,0 +1,58 @@
+name: rainier-raiders
+
+services:
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: rainier_raiders
+      POSTGRES_USER: rainier
+      POSTGRES_PASSWORD: local-development-only
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rainier -d rainier_raiders"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  website:
+    build:
+      context: .
+      dockerfile: apps/website/Dockerfile.dev
+    init: true
+    working_dir: /workspace
+    env_file:
+      - path: apps/website/.env.local
+        required: false
+    environment:
+      NODE_ENV: development
+      NEXT_TELEMETRY_DISABLED: "1"
+      DATABASE_URL: postgres://rainier:local-development-only@postgres:5432/rainier_raiders
+      DB_POOL_MAX: "5"
+    ports:
+      - "127.0.0.1:${WEBSITE_PORT:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/workspace
+      - root_node_modules:/workspace/node_modules
+      - website_node_modules:/workspace/apps/website/node_modules
+      - website_next:/workspace/apps/website/.next
+      - pnpm_store:/pnpm/store
+    command:
+      - sh
+      - -c
+      - >-
+        pnpm install --frozen-lockfile --store-dir /pnpm/store &&
+        pnpm db:migrate &&
+        pnpm --filter @rainier-raiders/website exec next dev --hostname 0.0.0.0
+
+volumes:
+  postgres_data:
+  root_node_modules:
+  website_node_modules:
+  website_next:
+  pnpm_store:

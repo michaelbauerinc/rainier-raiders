@@ -1,0 +1,20 @@
+{
+  "name": "rainier-raiders",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@12.21.0",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @rainier-raiders/website dev",
+    "build": "pnpm --filter @rainier-raiders/website build",
+    "start": "pnpm --filter @rainier-raiders/website start",
+    "lint": "pnpm --filter @rainier-raiders/website lint",
+    "typecheck": "pnpm --filter @rainier-raiders/website typecheck",
+    "check": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "test": "pnpm --filter @rainier-raiders/website test",
+    "db:migrate": "pnpm --filter @rainier-raiders/website db:migrate",
+    "db:generate": "pnpm --filter @rainier-raiders/website db:generate"
+  }
+}

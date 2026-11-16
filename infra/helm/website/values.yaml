@@ -1,0 +1,76 @@
+replicaCount: 1
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  # Releases are built by GitHub Actions. Pin deployments to the published digest.
+  repository: ghcr.io/michaelbauerinc/rainier-raiders-website
+  tag: unpublished
+  digest: ""
+  pullPolicy: IfNotPresent
+
+# Names of existing Secrets in the release namespace.
+imagePullSecrets: []
+existingSecrets: []
+serviceAccountName: ""
+
+# Non-secret environment variables. PORT, HOSTNAME, and NODE_ENV are reserved.
+# Existing Secrets take precedence over duplicate keys in this ConfigMap.
+# Preview mode is public and requires no credentials or database.
+# For the full app, set WEBSITE_MODE=full after configuring Discord OAuth.
+# Callback: <BETTER_AUTH_URL>/api/auth/callback/discord
+# Full mode uses existingSecrets for DATABASE_URL, BETTER_AUTH_SECRET, DISCORD_CLIENT_SECRET.
+# Keep credentials out of this file. Blank OAuth config disables login.
+config:
+  WEBSITE_MODE: "preview"
+  BETTER_AUTH_URL: ""
+  DISCORD_CLIENT_ID: ""
+  DISCORD_GUILD_ID: ""
+  DISCORD_EDITOR_ROLE_IDS: ""
+  DISCORD_OWNER_IDS: ""
+  DB_POOL_MAX: "5"
+
+service:
+  port: 3000
+
+ingress:
+  # This creates an Istio VirtualService, not a Kubernetes Ingress.
+  enabled: false
+  host: ""
+  gateway: istio-system/shoebox-studios-gateway
+
+podAnnotations: {}
+terminationGracePeriodSeconds: 30
+
+# Initial estimates, not measured capacity.
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+    ephemeral-storage: 256Mi
+  limits:
+    cpu: 1000m
+    memory: 768Mi
+    ephemeral-storage: 1Gi
+
+probes:
+  startup:
+    failureThreshold: 30
+    periodSeconds: 2
+    timeoutSeconds: 2
+  readiness:
+    failureThreshold: 3
+    periodSeconds: 5
+    timeoutSeconds: 2
+  liveness:
+    failureThreshold: 3
+    periodSeconds: 10
+    timeoutSeconds: 2
+
+storage:
+  cacheSizeLimit: 256Mi
+  tmpSizeLimit: 128Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
